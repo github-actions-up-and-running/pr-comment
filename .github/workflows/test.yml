@@ -10,14 +10,29 @@ jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - run: |
-        npm install
-        npm run all
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1.4.0
+        with:
+          node-version: 12.x
+      - run: |
+          npm ci
+          npm run all
+      - name: Verify no unstaged changes
+        run: |
+          if [[ "$(git status --porcelain)" != "" ]]; then
+            git status
+            echo "::error::Unstaged changes detected. Run 'npm run all' before commit"
+            exit 1
+          fi
   test: # make sure the action works on a clean machine without building
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: ./
-      with: 
-        milliseconds: 1000
+      - uses: actions/checkout@v1
+      - id: prComment
+        uses: ./
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: PR comment test
+      - name: Print comment URL
+        run: echo "Comment URL - ${{ steps.prComment.outputs.comment-url }}"
