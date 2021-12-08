@@ -5,6 +5,7 @@
 # PR Comment Action
 
 This action comments a message on PR.
+**Requires job to have Write permissions on pull-requests**
 
 ## Inputs
 
@@ -25,8 +26,16 @@ The PR comment URL.
 ## Example Usage
 
 ```yaml
-uses: github-actions-up-and-running/pr-comment@v1.0.0
-with:
-  repo-token: ${{ secrets.GITHUB_TOKEN }}
-  message: Nice PR!👍
+jobs:
+  Comment on PR:
+    name: Write Comment Job
+    permissions:
+        pull-requests: write
+
+    steps:
+      - name: Add comment to PR
+        uses: github-actions-up-and-running/pr-comment@v1.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          message: Nice PR!👍
 ```
